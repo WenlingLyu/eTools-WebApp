@@ -1,5 +1,5 @@
 # eTools Group Project
-See the Lab Specs for details on the lab.
+See the [Lab Specs]([http://www.cnblogs.com/sxdcgaq8080/p/7894828.html](https://github.com/WenlingLyu/eTools-WebApp/tree/main/Labspecs)) for details on the lab.
 
 ## Meet our Team
 
