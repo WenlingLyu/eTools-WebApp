@@ -1,0 +1,242 @@
+﻿@page
+@model eToolsWebFramework.Pages.SalesReturnsPages.ReturnsModel
+@{
+    ViewData["title"] = "Create Sale Page";
+}
+
+@section CustomCSS
+{
+<partial name="_MyCustomCSS" />
+}
+
+<script type="text/javascript">
+    function updateInput(inputValue, saleDetailID) {
+        const id = `returnQuantity'${saleDetailID}'`;
+        document.getElementById(id).value = inputValue;
+    }
+
+    function clear {
+        $('#feedback').remove();
+        $('#error').remove();
+    }
+</script>
+
+<form method="post">
+    <input type="hidden" name="RefundTotal" value="@Model.RefundTotal" />
+    <input type="hidden" name="SuccessfulTransaction" value="@Model.SuccessfulTransaction" />
+    @if (Model.InitialItems != null)
+    {
+        @foreach (var item in Model.InitialItems)
+        {
+            <input type="hidden" name="InitialItems.Index" value="@item.SaleDetailID" />
+            <input type="hidden" name="InitialItems[@item.SaleDetailID].SaleDetailID" value="@item.SaleDetailID" />
+            <input type="hidden" name="InitialItems[@item.SaleDetailID].StockItemID" value="@item.StockItemID" />
+            <input type="hidden" name="InitialItems[@item.SaleDetailID].Quantity" value="@item.Quantity" />
+            <input type="hidden" name="InitialItems[@item.SaleDetailID].QuantityRefunded" value="@item.QuantityRefunded" />
+            <input type="hidden" name="InitialItems[@item.SaleDetailID].SellingPrice" value="@item.SellingPrice" />
+            <input type="hidden" name="InitialItems[@item.SaleDetailID].Description" value="@item.Description" />
+        }
+    }
+    @if (Model.Employee != null)
+    {
+        <input type="hidden" name="Employee.EmployeeID" value="@Model.Employee.EmployeeID" />
+    }
+    @if (Model.RefundInfo != null)
+    {
+        <input type="hidden" name="RefundInfo.SaleID" value="@Model.RefundInfo.SaleID" />
+        <input type="hidden" name="RefundInfo.SaleRefundID" value="@Model.RefundInfo.SaleRefundID" />
+        <input type="hidden" name="RefundInfo.EmployeeID" value="@Model.RefundInfo.EmployeeID" />
+        <input type="hidden" name="RefundInfo.PaymentType" value="@Model.RefundInfo.PaymentType" />
+        <input type="hidden" name="RefundInfo.Date" value="@Model.RefundInfo.Date" />
+        <input type="hidden" name="RefundInfo.SubTotal" value="@Model.RefundInfo.SubTotal" />
+        <input type="hidden" name="RefundInfo.Tax" value="@Model.RefundInfo.Tax" />
+        <input type="hidden" name="RefundInfo.DiscountPercent" value="@Model.RefundInfo.DiscountPercent" />
+        <input type="hidden" name="RefundInfo.Discount" value="@Model.RefundInfo.Discount" />
+    }
+
+    <div class="display-flex page-header">
+        <h2>Checkout</h2>
+        <div class="sales-nav display-flex">
+            <button asp-area="" asp-page="/SalesReturnsPages/Sales">Continue Shopping</button>
+            <button asp-area="" asp-page="/SalesReturnsPages/ViewCart">View Cart</button>
+            <button asp-area="" asp-page="/SalesReturnsPages/Checkout">Checkout</button>
+            <button asp-area="" asp-page="/SalesReturnsPages/Returns">Returns/Refunds</button>
+        </div>
+    </div>
+
+    @if (Model.HasError)
+    {
+        <blockquote id="error" class="error">
+            @Model.Error
+            <ul>
+                @foreach (var detail in Model.ErrorDetails)
+                {
+                    <li>@detail</li>
+                }
+            </ul>
+        </blockquote>
+    }
+
+    @if (Model.HasFeedback)
+    {
+        <blockquote id="feedback" class="feedback">
+            <ul>
+                @foreach (var detail in Model.FeedbackDetails)
+                {
+                    <li>@detail</li>
+                }
+            </ul>
+        </blockquote>
+    }
+
+    <div class="sale-lookup display-flex" style="width:50%">
+        <label>
+            <p style="font-weight:bold">Lookup Sale</p>
+            <input type="text" asp-for="SaleID" value="@Model.SaleID" />
+        </label>
+        <button type="submit" asp-page-handler="SaleSearch" title="Search Sales">Search</button>
+    </div>
+
+    @if (Model.RefundInfo != null)
+    {
+        <div style="margin-top:2rem; border:1px solid white">
+            <div class="display-flex" style="margin-bottom:2rem">
+                <div class="sale-info">
+                    <p style="margin-left:1.2rem">Sale ID: <span style="font-weight:bold">@Model.RefundInfo.SaleID</span></p>
+                    <p title="Month/Day/Year">Sale Date: <span style="font-weight:bold">@Model.RefundInfo.Date.ToString("MM/dd/yyyy")</span></p>
+                </div>
+                <h3 style="margin-left: 12rem;margin-top: 5.5rem;">Order Items</h3>
+            </div>
+
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th style="text-decoration:underline">Item Name</th>
+                        <th style="text-decoration:underline;width:20%">Order Qty.</th>
+                        <th style="text-decoration:underline">Price</th>
+                        <th title="Quantity Refunded" style="text-decoration:underline">QR</th>
+                        <th title="Quantity to be Refunded" style="text-decoration:underline">QR</th>
+                        <th style="text-decoration:underline">Return Qty.</th>
+                        <td></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.InitialItems != null)
+                    {
+                        @foreach (var item in Model.InitialItems)
+                        {
+                            <tr>
+                                <td>
+                                    @item.Description
+                                </td>
+                                <td>
+                                    @item.Quantity
+                                </td>
+                                <td>
+                                    $@item.SellingPrice.ToString("0.00")
+                                </td>
+                                <td>
+                                    <span style="font-weight:bold;color:lightblue">@item.QuantityRefunded</span>
+                                </td>
+                                <td>
+                                    <span style="font-weight:bold;color:lightblue">@item.ReturnQuantity</span>
+                                </td>
+                                <td style="display:flex;justify-content:center">
+                                    @if (item.QuantityRefunded == item.Quantity)
+                                    {
+                                        <input type="number" disabled />
+                                    }
+                                    else
+                                    {
+                                        <input id="returnQuantity'@item.SaleDetailID'" type="number" name="InitialItems[@item.SaleDetailID].ReturnQuantity" value="@item.ReturnQuantity" oninput="updateInput(inputValue, @item.SaleDetailID)" />
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.QuantityRefunded == item.Quantity || Model.SuccessfulTransaction == true)
+                                    {
+                                        <button type="submit" asp-page-handler="UpdateReturnTotals" name="SelectedItem" value="@item.SaleDetailID" disabled>Refund</button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit" asp-page-handler="UpdateReturnTotals" name="SelectedItem" value="@item.SaleDetailID">Refund</button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (Model.RefundItems != null)
+        {
+            <div style="margin-top:2rem; border:1px solid white">
+                <h3 style="text-align:center">Refund Items</h3>
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th style="text-decoration:underline">Item Name</th>
+                            <th style="text-decoration:underline">Price</th>
+                            <th style="text-decoration:underline">Return Qty.</th>
+                            <td></td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.RefundItems)
+                        {
+                            <input type="hidden" name="RefundItems.Index" value="@item.SaleDetailID" />
+                            <input type="hidden" name="RefundItems[@item.SaleDetailID].SaleDetailID" value="@item.SaleDetailID" />
+                            <input type="hidden" name="RefundItems[@item.SaleDetailID].StockItemID" value="@item.StockItemID" />
+                            <input type="hidden" name="RefundItems[@item.SaleDetailID].Description" value="@item.Description" />
+                            <input type="hidden" name="RefundItems[@item.SaleDetailID].SellingPrice" value="@item.SellingPrice" />
+                            <input type="hidden" name="RefundItems[@item.SaleDetailID].ReturnQuantity" value="@item.ReturnQuantity" />
+                            @if (item.ReturnQuantity != 0)
+                            {
+                                <tr>
+                                    <td>
+                                        @item.Description
+                                    </td>
+                                    <td>
+                                        $@item.SellingPrice.ToString("0.00")
+                                    </td>
+                                    <td>
+
+                                        <span style="font-weight:bold;color:lightblue">@item.ReturnQuantity</span>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        <div class="display-flex" style="justify-content:space-between">
+            <div class="ordertotals-container">
+                <h3>Refund Details</h3>
+                <div class="display-flex" style="border:1px solid white">
+                    <div style="width:50%;border:1px solid white;padding:1rem">
+                        <p style="margin-left:2.3rem">Refund ID: <span style="font-weight:bold">@Model.RefundInfo.SaleRefundID</span></p>
+                        <p style="margin-left:0.5rem">Payment Type: <span style="font-weight:bold">@Model.RefundInfo.PaymentType</span></p>
+                    </div>
+                    <div style="width:50%;border:1px solid white;padding:1rem">
+                        <p style="margin-left:2.4rem">Subtotal:<span style="margin-left:0.8rem">$@Model.RefundInfo.SubTotal.ToString("0.00")</span></p>
+                        <p style="margin-left:4.7rem">Tax:<span style="margin-left:0.8rem">$@Model.RefundInfo.Tax.ToString("0.00")</span></p>
+                        <p style="margin-left:0.2rem">Discount(@Model.RefundInfo.DiscountPercent%): <span style="margin-left:0.5rem">$@Model.RefundInfo.Discount.ToString("0.00")</span></p>
+                        <div class="display-flex" style="margin-left:0.3rem">
+                            <p style="font-weight:bold">Refund Total: <span style="font-weight:bold">$@Model.RefundTotal.ToString("0.00")</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="clear-button" type="submit" asp-page-handler="Clear" title="Clear Page" onclick="return confirm('Are you sure you want to clear page?')">Clear</button>
+            @if (Model.SuccessfulTransaction == true)
+            {
+                <button class="refund-button" type="submit" asp-page-handler="ProcessRefund" title="Process Refund" onclick="return confirm('Are you sure all refunded items are included to be processed?')" disabled>Process Refund</button>
+            }
+            else
+            {
+                <button class="refund-button" type="submit" asp-page-handler="ProcessRefund" title="Process Refund" onclick="return confirm('Are you sure all refunded items are included to be processed?')">Process Refund</button>
+            }
+        </div>
+
+    }
+</form>

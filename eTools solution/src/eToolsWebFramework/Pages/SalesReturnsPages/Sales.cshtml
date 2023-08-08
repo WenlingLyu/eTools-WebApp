@@ -1,0 +1,261 @@
+﻿@page
+@model eToolsWebFramework.Pages.SalesReturnsPages.SalesModel
+@{
+    ViewData["title"] = "Create Sale Page";
+}
+
+@section CustomCSS
+{
+<partial name="_MyCustomCSS" />
+}
+
+@section Scripts
+{
+<script type="text/javascript">
+    function clear {
+        $('#feedback').remove();
+        $('#error').remove();
+    }
+</script>
+}
+
+
+<form method="post">
+    <div id="cartItemData">
+        @if (Model.CartItems != null)
+        {
+            @foreach (var item in Model.CartItems)
+            {
+                <input type="hidden" name="CartItems.Index" value="@item.StockItemID" />
+                <input type="hidden" name="CartItems[@item.StockItemID].StockItemID" value="@item.StockItemID" />
+                <input type="hidden" name="CartItems[@item.StockItemID].SelectedItem" value="@item.SelectedItem" />
+                <input type="hidden" name="CartItems[@item.StockItemID].Quantity" value="@item.Quantity" />
+                <input type="hidden" name="CartItems[@item.StockItemID].SellingPrice" value="@item.SellingPrice" />
+                <input type="hidden" name="CartItems[@item.StockItemID].ItemTotal" value="@item.ItemTotal" />
+                <input type="hidden" name="CartItems[@item.StockItemID].Description" value="@item.Description" />
+            }
+        }
+    </div>
+    <div id="pageData">
+        @if (Model.RetrievedItems != null)
+        {
+            @foreach (var item in Model.RetrievedItems)
+            {
+                <input type="hidden" name="RetrievedItems.Index" value="@item.StockItemID" />
+                <input type="hidden" name="RetrievedItems[@item.StockItemID].StockItemID" value="@item.StockItemID" />
+                <input type="hidden" value="@item.Price" name="RetrievedItems[@item.StockItemID].Price" />
+                <input type="hidden" value="@item.Description" name="RetrievedItems[@item.StockItemID].Description" />
+                <input type="hidden" value="@item.QuantityOnHand" name="RetrievedItems[@item.StockItemID].QuantityOnHand" />
+            }
+        }
+        @if (Model.Employee != null)
+        {
+            <input type="hidden" name="Employee.EmployeeID" value="@Model.Employee.EmployeeID" />
+            <input type="hidden" name="Employee.FirstName" value="@Model.Employee.FirstName" />
+            <input type="hidden" name="Employee.LastName" value="@Model.Employee.LastName" />
+        }
+        @if (Model.SaleInfo != null)
+        {
+            <input type="hidden" name="SaleInfo.SubTotal" value="@Model.SaleInfo.SubTotal" />
+            <input type="hidden" name="SaleInfo.EmployeeID" value="@Model.SaleInfo.EmployeeID" />
+            <input type="hidden" name="SaleInfo.Date" value="@Model.SaleInfo.Date"/>
+        }
+        @if (Model.Coupon != null)
+        {
+            <input type="hidden" name="Coupon.CouponID" value="@Model.Coupon.CouponID" />
+            <input type="hidden" name="Coupon.CouponValue" value="@Model.Coupon.CouponValue" />
+            <input type="hidden" name="Coupon.Discount" value="@Model.Coupon.Discount" />
+        }
+    </div>
+
+    @if (Model.Employee == null || Model.Employee.EmployeeID == 0)
+    {   
+        @if (Model.HasError)
+        {
+            <blockquote id="error" class="error">
+                @Model.Error
+                <ul>
+                    @foreach (var detail in Model.ErrorDetails)
+                    {
+                        <li>@detail</li>
+                    }
+                </ul>
+            </blockquote>
+        }
+
+        <blockquote>
+            Please enter employee login information to access Sales content.
+        </blockquote>
+
+        <div class="login">
+            <div>
+                <h3>Employee Login</h3>
+                <label>
+                    Login ID
+                    <input style="margin-top:0.5rem" type="text" asp-for="LoginID" />
+                </label>
+                <label>
+                    Phone Number
+                    <input style="margin-top:0.5rem" type="tel" pattern="[0-9]{10}" placeholder="7801234567" asp-for="Phone" />
+                </label>
+                <button style="margin-top:2rem" type="submit" title="Login" asp-page-handler="EmployeeValidation">Login</button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div>
+            <div class="display-flex page-header">
+                <h2>Shopping</h2>
+                <div class="sales-nav display-flex">
+                    <button asp-area="" asp-page="/SalesReturnsPages/Sales" onclick="clear()">Continue Shopping</button>
+                    <button asp-area="" asp-page="/SalesReturnsPages/ViewCart" onclick="clear()">View Cart</button>
+                    <button asp-area="" asp-page="/SalesReturnsPages/Checkout" onclick="clear()">Checkout</button>
+                    <button asp-area="" asp-page="/SalesReturnsPages/Returns" onclick="return confirm('Are you sure you wish to continue? (current Sale/Cart information will not be saved and you will have to start over)')">Returns/Refunds</button>
+                </div>
+            </div>
+            <div class="display-flex page-header" style="margin-top:2rem">
+                <div class="date-container">
+                    <p style="text-decoration:underline; font-weight:bold">Date</p>
+                    @if (Model.SaleInfo != null)
+                    {
+                        <p>@Model.SaleInfo.Date.ToString("MM/dd/yyyy")</p>
+                    }     
+                </div>
+                <button class="reset-button" type="submit" asp-page-handler="NewOrder" asp-area="" asp-page="/SalesReturnsPages/Sales" onclick="return confirm('Are you sure you wish to cancel transaction? (current Sale/Cart information will reset)')">Cancel</button>
+            </div>
+        </div>
+        @if (Model.HasError)
+        {
+            <blockquote id="error" class="error">
+                @Model.Error
+                <ul>
+                    @foreach (var detail in Model.ErrorDetails)
+                    {
+                        <li>@detail</li>
+                    }
+                </ul>
+            </blockquote>
+        }
+
+        @if (Model.HasFeedback)
+        {
+            <blockquote id="feedback" class="feedback">
+                <ul>
+                    @foreach (var detail in Model.FeedbackDetails)
+                    {
+                        <li>@detail</li>
+                    }
+                </ul>
+            </blockquote>
+        }
+        <div style="margin-top:2rem;padding:1rem; border:2px solid white">
+            <div class="display-flex shopping-container-1">
+                <div class="item-search-bar display-flex">
+                    <label>
+                        Search Item
+                        <input type="text" asp-for="SearchInput" value="@Model.SearchInput" />
+                        <br />
+                        <input type="radio" asp-for="SearchType" value="ItemName" />&nbsp;Item Name
+                        &nbsp;&nbsp;
+                        <input type="radio" asp-for="SearchType" value="Category" />&nbsp;Category
+                        &nbsp;&nbsp;
+                    </label>
+                    <button type="submit" asp-page-handler="SearchItemsByInput" title="Search items" onclick="clear()">Search</button>
+                </div>
+            </div>
+            <div class="display-flex shopping-container-2">
+                <select asp-for="CategorySelection">
+                    <option value="0">Select a Category...</option>
+                    <option value="All">All (@Model.TotalItemCount)</option>
+                    @foreach (var category in Model.CategoryList)
+                    {
+                        <option value="@category.CategoryID">@category.Description (@category.ItemCount)</option>
+                    }
+                </select>
+                <button type="submit" asp-page-handler="SearchItemsByCategory" title="Search by category" onclick="clear()">Search</button>
+            </div>
+
+            <div style="margin-top:2rem" class="display-results-containers">
+                <h3 style="text-align:center">Item List</h3>
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th title="Quantity to Add" style="text-decoration:underline">QTA</th>
+                            <th style="text-decoration:underline">Price</th>
+                            <th style="text-decoration:underline">Description</th>
+                            <th title="Quantity on Hand" style="text-decoration:underline">QOH</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.RetrievedItems != null)
+                        {
+                            @foreach (var item in Model.DisplayItems)
+                            {
+                                <tr>
+                                    <td>
+                                        <input type="hidden" name="SelectedItems.Index" value="@item.StockItemID">
+                                        <input type="hidden" name="DisplayItems.Index" value="@item.StockItemID">
+                                        <input type="hidden" value="@item.StockItemID" name="SelectedItems[@item.StockItemID].StockItemID" />
+                                        <input type="hidden" value="@item.StockItemID" name="DisplayItems[@item.StockItemID].StockItemID" />
+                                        <input type="checkbox" value="true" name="SelectedItems[@item.StockItemID].SelectedItem" />
+                                    </td>
+                                    <td style="display:flex;justify-content:center">
+                                        <input type="number" name="SelectedItems[@item.StockItemID].Quantity" value="1" />
+                                    </td>
+                                    <td>
+                                        <input type="hidden" value="@item.Price" name="DisplayItems[@item.StockItemID].Price" />
+                                        <input type="hidden" value="@item.Price" name="SelectedItems[@item.StockItemID].SellingPrice" />
+                                        $@item.Price.ToString("0.00")
+                                    </td>
+                                    <td>
+                                        <input type="hidden" value="@item.Description" name="DisplayItems[@item.StockItemID].Description" />
+                                        <input type="hidden" value="@item.Description" name="SelectedItems[@item.StockItemID].Description" />
+                                        @item.Description
+                                    </td>
+                                    <td>
+                                        <input type="hidden" value="@item.QuantityOnHand" name="DisplayItems[@item.StockItemID].QuantityOnHand" />
+                                        @item.QuantityOnHand
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="6">
+                                @if (Model.Pager != null)
+                                {
+                                    @foreach (var pageRef in Model.Pager)
+                                    {
+                                        // I can use the == because of PageRef type being a C# 9 record type
+                                        if (pageRef == Model.Pager.CurrentPage)
+                                        {
+                                                <b>@pageRef.Text</b>
+                                        }
+                                        else
+                                        {       
+                                                <button type="submit" title="Page @pageRef.Page" asp-page-handler="DisplaySelectedPage" name="currentPage"
+                                            value="@pageRef.Page">@pageRef.Text</button>
+                                        }
+                                    }
+                                }            
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <div class="button-container display-flex">
+                    <button class="add-to-cart" type="submit" asp-page-handler="AddToCart" onclick="clear()">Add to Cart</button>
+                    <button asp-area="" asp-page="/SalesReturnsPages/ViewCart">Proceed to Cart ></button>
+                </div>
+            </div>
+        </div>
+    }
+</form>
+
+
+
+
+
+

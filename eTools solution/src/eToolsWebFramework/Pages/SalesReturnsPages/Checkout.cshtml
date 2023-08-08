@@ -1,0 +1,242 @@
+﻿@page
+@model eToolsWebFramework.Pages.SalesReturnsPages.CheckoutModel
+@{
+    ViewData["title"] = "View Cart Page";
+}
+
+@section CustomCSS
+{
+<partial name="_MyCustomCSS" />
+}
+
+@section Scripts
+{
+<script type="text/javascript">
+    function clear {
+        $('#feedback').remove();
+        $('#error').remove();
+    }
+</script>
+}
+
+<form method="post">
+    <div id="cartItemData">
+        @if (Model.CartItems != null)
+        {
+            @foreach (var item in Model.CartItems)
+            {
+                <input type="hidden" name="CartItems.Index" value="@item.StockItemID" />
+                <input type="hidden" name="CartItems[@item.StockItemID].StockItemID" value="@item.StockItemID" />
+                <input type="hidden" name="CartItems[@item.StockItemID].SelectedItem" value="@item.SelectedItem" />
+                <input type="hidden" name="CartItems[@item.StockItemID].Quantity" value="@item.Quantity" />
+                <input type="hidden" name="CartItems[@item.StockItemID].SellingPrice" value="@item.SellingPrice" />
+                <input type="hidden" name="CartItems[@item.StockItemID].ItemTotal" value="@item.ItemTotal" />
+                <input type="hidden" name="CartItems[@item.StockItemID].Description" value="@item.Description" />
+            }
+        }
+    </div>
+
+    <div id="pageData">
+        @if (!string.IsNullOrWhiteSpace(Model.SearchInput) && !string.IsNullOrWhiteSpace(Model.SearchType))
+        {
+            <input type="hidden" name="SearchInput" value="@Model.SearchInput" />
+            <input type="hidden" name="SearchType" value="@Model.SearchType" />
+        }
+        @if (Model.CategorySelection != "0")
+        {
+            <input type="hidden" name="CategorySelection" value="@Model.CategorySelection" />
+        }
+        @if (Model.RetrievedItems != null)
+        {
+            @foreach (var item in Model.RetrievedItems)
+            {
+                <input type="hidden" name="RetrievedItems.Index" value="@item.StockItemID" />
+                <input type="hidden" name="RetrievedItems[@item.StockItemID].StockItemID" value="@item.StockItemID" />
+                <input type="hidden" value="@item.Price" name="RetrievedItems[@item.StockItemID].Price" />
+                <input type="hidden" value="@item.Description" name="RetrievedItems[@item.StockItemID].Description" />
+                <input type="hidden" value="@item.QuantityOnHand" name="RetrievedItems[@item.StockItemID].QuantityOnHand" />
+            }
+        }
+        @if (Model.SaleInfo != null)
+        {
+            <input type="hidden" name="SaleInfo.SubTotal" value="@Model.SaleInfo.SubTotal" />
+            <input type="hidden" name="SaleInfo.Tax" value="@Model.SaleInfo.Tax" />
+            <input type="hidden" name="SaleInfo.EmployeeID" value="@Model.SaleInfo.EmployeeID" />
+            <input type="hidden" name="SaleInfo.Date" value="@Model.SaleInfo.Date" />
+        }
+
+        @if (Model.Coupon != null)
+        {
+            <input type="hidden" name="Coupon.CouponID" value="@Model.Coupon.CouponID" />
+            <input type="hidden" name="Coupon.CouponValue" value="@Model.Coupon.CouponValue" />
+            <input type="hidden" name="Coupon.Discount" value="@Model.Coupon.Discount" />
+        }
+
+        @if (Model.OrderTotal != 0.00m)
+        {
+            <input type="hidden" name="OrderTotal" value="@Model.OrderTotal" />
+        }
+        @if (Model.Employee != null)
+        {
+            <input type="hidden" name="Employee.EmployeeID" value="@Model.Employee.EmployeeID" />
+        }
+        <input type="hidden" name="SaleID" value="@Model.SaleID" />
+    </div>
+
+    @if (Model.SaleID == 0)
+    {
+        <div>
+            <div class="display-flex page-header">
+                <h2>Checkout</h2>
+                <div class="sales-nav display-flex">
+                    <button asp-area="" asp-page="/SalesReturnsPages/Sales" onclick="clear()">Continue Shopping</button>
+                    <button asp-area="" asp-page="/SalesReturnsPages/ViewCart" onclick="clear()">View Cart</button>
+                    <button asp-area="" asp-page="/SalesReturnsPages/Checkout" onclick="clear()">Checkout</button>
+                    <button asp-area="" asp-page="/SalesReturnsPages/Returns" onclick="return confirm('Are you sure you wish to continue? (current Sale/Cart information will not be saved and you will have to start over)')">Returns/Refunds</button>
+                </div>
+            </div>
+            <div class="display-flex page-header" style="margin-top:2rem">
+                <div class="date-container">
+                    <p style="text-decoration:underline; font-weight:bold">Date</p>
+                    @if (Model.SaleInfo != null)
+                    {
+                        <p>@Model.SaleInfo.Date.ToString("MM/dd/yyyy")</p>
+                    } 
+                </div>
+                <button class="reset-button" type="submit" asp-page-handler="NewOrder" asp-area="" asp-page="/SalesReturnsPages/Sales" onclick="return confirm('Are you sure you wish to cancel transaction? (current Sale/Cart information will reset)')">Cancel</button>
+            </div>
+        </div>
+
+        @if (Model.HasError)
+        {
+            <blockquote id="error" class="error">
+                @Model.Error
+                <ul>
+                    @foreach (var detail in Model.ErrorDetails)
+                    {
+                        <li>@detail</li>
+                    }
+                </ul>
+            </blockquote>
+        }
+
+        @if (Model.HasFeedback)
+        {
+            <blockquote id="feedback" class="feedback">
+                <ul>
+                    @foreach (var detail in Model.FeedbackDetails)
+                    {
+                        <li>@detail</li>
+                    }
+                </ul>
+            </blockquote>
+        }
+
+        @if (Model.CartItems != null)
+        {
+            <div style="margin-top:2rem">
+                <h3 style="text-align:center">Item Cart</h3>
+                <table class="item-cart">
+                    <thead>
+                        <tr>
+                            <th style="text-decoration:underline">Item Name</th>
+                            <th style="text-decoration:underline">Price</th>
+                            <th title="Quantity to Add" style="text-decoration:underline">QTA</th>
+                            <th style="text-decoration:underline">Item Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.CartItems)
+                        {
+                            <tr>
+                                <td>
+                                    @item.Description
+                                </td>
+                                <td>
+                                    $@item.SellingPrice.ToString("0.00")
+                                </td>
+                                <td>
+                                    @item.Quantity
+                                </td>
+                                <td>
+                                    $@item.ItemTotal.ToString("0.00")
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <div class="display-flex" style="justify-content:space-between; margin-top:2rem">
+                    <div class="saletotals-container">
+                        @if (Model.SaleInfo != null)
+                        {
+                            <label class="totals display-flex" asp-for="SaleInfo.SubTotal">
+                                <p style="margin-left: 2.4rem;">Subtotal:</p>
+                                <p>$@Model.SaleInfo.SubTotal.ToString("0.00")</p>
+                            </label>
+                            <label class="totals display-flex" asp-for="SaleInfo.Tax">
+                                <p style="margin-left: 2.6rem;">Tax(5%):</p>
+                                <p>$@Model.SaleInfo.Tax.ToString("0.00")</p>
+                            </label>
+                            @if (Model.Coupon != null)
+                            {
+                                <label class="totals display-flex" asp-for="SaleInfo.Discount">
+                                    <p>Discount(@Model.Coupon.Discount%):</p>
+                                    <p>$@Model.SaleInfo.Discount.ToString("0.00")</p>
+                                </label>
+                            }
+                            <label class="totals display-flex" asp-for="OrderTotal">
+                                <p style="margin-left: 1.3rem">OrderTotal:</p>
+                                <p>$@Model.OrderTotal.ToString("0.00")</p>
+                            </label>
+                        }
+                    </div>
+                    <div class="coupon">
+                        @if (Model.Coupon != null)
+                        {
+                            <p style="color:lightblue;font-weight:bold">Current coupon applied: @Model.Coupon.CouponValue</p>
+                        }
+                        <label>
+                            <p style="text-decoration:underline; font-weight:bold">Coupon:</p>
+                            <input style="width:80%" type="text" asp-for="CouponInput" />
+                            <button style="margin-top:1rem" type="submit" asp-page-handler="ValidateCoupon" title="Validate Coupon" onclick="clear()">Apply</button>
+                        </label>
+                        <div class="payment-type">
+                            <label>
+                                <p style="font-weight:bold">Payment Type</p>
+                                <div>
+                                    <input type="radio" asp-for="PaymentType" value="M" />&nbsp;Cash
+                                    &nbsp;&nbsp;
+                                    <input type="radio" asp-for="PaymentType" value="D" />&nbsp;Debit
+                                    &nbsp;&nbsp;
+                                    <input type="radio" asp-for="PaymentType" value="C" />&nbsp;Credit
+                                    &nbsp;&nbsp;
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="button-container display-flex">
+                    <button asp-area="" asp-page="/SalesReturnsPages/ViewCart" onclick="clear()">Return to Cart</button>
+                    <button type="submit" onclick="return confirm('Are you sure you wish to place order? (After order is placed items in item cart is finalized and can not be updated)')" asp-page-handler="ProcessOrder">Place Order</button>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        @if (Model.HasFeedback)
+        {
+            <blockquote id="feedback" class="feedback">
+                <ul>
+                    @foreach (var detail in Model.FeedbackDetails)
+                    {
+                        <li>@detail</li>
+                    }
+                </ul>
+            </blockquote>
+        }
+        <div class="display-flex" style="margin-top:2rem; justify-content:center">
+            <button type="submit" asp-area="" asp-page="/SalesReturnsPages/Sales">New Order</button>
+        </div>
+    }
+</form>

@@ -1,0 +1,264 @@
+﻿@page "{LoginID?}/{Phone?}/{VendorID?}"
+@model eToolsWebFramework.Pages.PurchasingPages.PurchasingTestModel
+@{
+}
+
+@section CustomCSS{
+    <partial name=_MyCustomCSS />
+}
+<h1>Purchasing Management</h1>
+
+@if (Model.HasFeedBack)
+{
+    <p class="feedback">@Model.FeedBackMessage</p>
+}
+@if (Model.HasError)
+{
+    <blockquote class="error">
+        @Model.ErrorMessage
+        <ul>
+            @foreach (var detail in Model.ErrorDetails)
+            {
+                <li>@detail</li>
+            }
+        </ul>
+    </blockquote>
+}
+<section class="flex">
+    <form method="POST" class="vendors flex">
+        <div class="vendor-search flex oneHalf">
+                <h3>Employee Login</h3>
+                <label>
+                    Login ID
+                    <input style="margin-top:0.5rem" type="text" asp-for="LoginID" />
+                </label>
+                <label>
+                    Phone Number
+                    <input style="margin-top:0.5rem" type="tel" pattern="[0-9]{10}" placeholder="7801234567" asp-for="Phone" />
+                </label>
+            <h3>Vendor</h3> 
+            <label>
+                Vendor 
+                <select asp-for="VendorID">
+                    <option value="0">Select vendor...</option>
+                    <option value="1">HandTools Wholesale</option>
+                    <option value="2">Hardware International</option>
+                    <option value="3">THOMAS Brown & Sons</option>
+                    <option value="4">Nuts, Bolts and Fastseners</option>
+                </select>
+            </label>
+            <footer>
+                <button type="submit" asp-page-handler="FindOrderAndEmployeeValidation"> 
+                   Login and Find Vendor
+                </button>
+            </footer>
+        </div>
+        <div class="vendor-info flex oneHalf">
+            @if(Model.Employee != null)
+            {
+                <p>Welcome: @Model.Employee.FirstName @Model.Employee.LastName</p>
+            }
+            @if (Model.Vendor == null)
+            {
+                <p>Phone:</p>
+                <p>City:</p>
+                <p>PO #:</p>
+            }
+            else
+            {
+                @if (Model.PurchaseOrder != null)
+                {  
+                  <p>Phone: @Model.Vendor.Phone; City: @Model.Vendor.City; PO #: @Model.PurchaseOrder.PurchaseOrderID</p>
+                }
+                else
+                {
+                  <p>Phone: @Model.Vendor.Phone; City: @Model.Vendor.City; PO #: New Order</p>
+                }
+            }
+        </div>
+    </form>
+</section>
+
+<section>
+    <form method="POST">
+        <div class="order-values flex">
+             @if (Model.VendorID > 0)
+            {
+                <p>SubTotal: @Math.Round(Model.subtotal, 2); GST: @Math.Round(Model.gst, 2); Total: @Math.Round(Model.total, 2)</p>
+            }
+        </div>
+         <h2>Current Active Order</h2>
+        <div class="form-controls">
+             @if (Model.Vendor != null)
+                {
+                    <button type="submit" asp-page-handler="UpdateOrder" class="form-control" 
+                    style="background-color:orange;">
+                        Update Order
+                    </button>
+
+                    <button type="submit" asp-page-handler="PlaceOrder" class="form-control" onclick="return confirm('Are you sure to place this order? Once placed Order can not be changed')"
+                    style="background-color:orange;">
+                        Place Order
+                    </button>
+
+                    <button type="submit" asp-page-handler="DeleteOrder" class="form-control" onclick="return confirm('Are you sure to Delte this order? Place order can not be delete')"
+                    style="background-color:orange;">
+                        Delete Order
+                    </button>
+
+                   <button type="submit" asp-page-handler="Clear" class="form-control" onclick="return confirm('Are you sure to Clear?')"
+                    style="background-color:orange;">
+                        Clear
+                    </button>
+                  }  
+        </div>
+        @if (Model.VendorID > 0)
+        {
+            <div class="flex table-display">
+               <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>ID</th>
+                            <th>Description</th>
+                            <th>QOH</th>
+                            <th>ROL</th>
+                            <th>QOO</th>
+                            <th>QTO</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.CurrentOrder)
+                        {
+                            <tr>
+                                <td>
+                                    <button type="submit"  class="delete-button" name="itemToMoveOnOrder" value="@item.stockItemID"
+                                    asp-page-handler="RemoveOrderItem">
+                                        Remove
+                                    </button>
+                                </td>
+                                <td>
+                                    <input type="hidden" name="CurrentOrder.Index" value="@item.stockItemID" />
+                                    <input type="hidden" name="CurrentOrder[@item.stockItemID].stockItemID"
+                                   value="@item.stockItemID" />
+                                    <input type="hidden" name="CurrentOrder[@item.stockItemID].PurchaseOrderDetailID"
+                                   value="@item.PurchaseOrderDetailID" />
+                                    @item.stockItemID
+                                </td>
+                                <td>
+                                    <input type="hidden" name="CurrentOrder[@item.stockItemID].Description"
+                                   value="@item.Description" />
+                                    @item.Description
+                                </td>
+                                <td>
+                                    <input type="hidden" name="CurrentOrder[@item.stockItemID].QOH"
+                                   value="@item.QOH" />
+                                    @item.QOH
+                                </td>
+                                <td>
+                                    <input type="hidden" name="CurrentOrder[@item.stockItemID].ROL"
+                                   value="@item.ROL" />
+                                    @item.ROL
+                                </td>
+                                <td>
+                                    <input type="hidden" name="CurrentOrder[@item.stockItemID].QOO"
+                                   value="@item.QOH" />
+                                    @item.QOO
+                                </td>
+                                <td>
+                                    <input type="number" min="1" max="100000" step="1"
+                                   name="CurrentOrder[@item.stockItemID].QTO" asp-for="inputQTO" 
+                                   value="@item.QTO"/> 
+                                </td>
+                                <td>
+                                    <input type="number" min="0" max="100000" step="0.01" asp-for="inputPrice" 
+                                   name="CurrentOrder[@item.stockItemID].Price"
+                                   value="@Math.Round(item.Price, 2)" />
+                                </td>
+                                <td>
+                                   <input type="hidden"name="CurrentOrder[@item.stockItemID].Total"
+                                   value="@Math.Round(item.Total, 2)" />
+                                   @Math.Round(item.Total, 2)
+                                </td>
+                                <td>
+                                    <input type="hidden" asp-for="itemToRefersh" value="@item.stockItemID">
+                                    <button type="submit" class="refresh-button" asp-page-handler="RefreshOrderItem" value="@item.stockItemID"
+                                    style="background-color:blue;">
+                                        Refresh
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <h2>Vendor Inventory</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Description</th>
+                            <th>QOH</th>
+                            <th>ROL</th>
+                            <th>QOO</th>
+                            <th>Buffer</th>
+                            <th>Price</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.VendorInventory)
+                        {
+                            <tr>
+                                <td>
+                                    <input type="hidden" name="VendorInventory.Index" value="@item.stockItemID" />
+                                    <input type="hidden" name="VendorInventory[@item.stockItemID].stockItemID"
+                                   value="@item.stockItemID" />
+                                    @item.stockItemID
+                                </td>
+                                <td>
+                                    <input type="hidden" name="VendorInventory[@item.stockItemID].Description"
+                                   value="@item.Description" />
+                                    @item.Description
+                                </td>
+                                <td>
+                                    <input type="hidden" name="VendorInventory[@item.stockItemID].QuantityOnHand"
+                                   value="@item.QOH" />
+                                    @item.QOH
+                                </td>
+                                <td>
+                                    <input type="hidden" name="VendorInventory[@item.stockItemID].QuantityOnOrder"
+                                   value="@item.QOO" />
+                                    @item.QOO
+                                </td>
+                                <td>
+                                    <input type="hidden" name="VendorInventory[@item.stockItemID].ReorderLevel"
+                                   value="@item.ROL" />
+                                    @item.ROL
+                                </td>
+                                <td>
+                                    <input type="hidden" name="VendorInventory[@item.stockItemID].Buffer"
+                                   value="@item.Buffer" />
+                                    @item.Buffer
+                                </td>
+                                <td>
+                                    <input type="hidden" name="VendorInventory[@item.stockItemID].PurchasePrice"
+                                   value="@item.Price" />
+                                    @Math.Round(item.Price, 2)
+                                </td>
+                                <td>
+                                    <button type="submit" name="vendorItemToMove" value="@item.stockItemID"
+                                    asp-page-handler="AddItem">
+                                        ADD
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </form>
+</section>

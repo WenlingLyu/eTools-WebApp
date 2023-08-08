@@ -1,0 +1,67 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Tools R Us</title>
+    @*https://holidaycss.js.org/*@
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/holiday.css@0.9.8" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/eToolsWebFramework.styles.css" asp-append-version="true" />
+    @RenderSection("CustomCSS", required:false)
+</head>
+<body>
+    <header>
+        <div class="display-flex">
+            <a asp-area="" asp-page="/Index"><img class="site-logo" src="/img/eToolsMenuLogo.jpg" alt="eTools Logo" title="Go to Home" /></a>
+            <h1><a asp-area="" asp-page="/Index">Tools R Us</a></h1>
+        </div>
+        <nav>
+            <ul>
+                <li>
+                    <a asp-area="" asp-page="/Index">Home</a>
+                </li>
+                <li>
+                    <span>Manage Purchasing Order</span>
+                    <ul>
+                        <li>
+                            <a asp-area="" asp-page="/PurchasingPages/Index">Purchasing Home</a>
+                        </li>
+                        <li>
+                            <a asp-area="" asp-page="/PurchasingPages/PurchasingTest">Manage Purchasing</a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <span>Sales & Returns</span>
+                    <ul>
+                        <li>
+                            <a asp-area="" asp-page="/SalesReturnsPages/Index">Sales Home</a>
+                        </li>
+                        <li>
+                            <a asp-area="" asp-page="/SalesReturnsPages/Sales">Create Sale</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <div>
+        <main role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer>
+        <div>
+            &copy; 2022 - Tools R Us - <a asp-area="" asp-page="/Privacy">Privacy</a>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
