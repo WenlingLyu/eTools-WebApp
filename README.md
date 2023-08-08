@@ -1,5 +1,4 @@
 # eTools Group Project
-Intranet application
 See the Lab Specs for details on the lab.
 
 ## Meet our Team
